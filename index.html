@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クリッカブル世界地図</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        /* イメージマップの領域にカーソルを合わせるとポインターに変わるように設定 */
+        area {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="text-center p-6 md:p-8 bg-white rounded-2xl shadow-lg max-w-4xl mx-auto w-11/12">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">クリッカブル世界地図</h1>
+        <p class="text-gray-600 mb-6">地図上の日本（赤）またはブラジル（緑）をクリックすると、音声が再生されます。</p>
+
+        <!-- 地図画像と、それに関連付けるイメージマップ -->
+        <div class="relative border rounded-lg overflow-hidden">
+            <img src="map-jb.jpg" alt="世界地図" usemap="#worldmap" class="w-full h-auto">
+            
+            <!-- イメージマップの定義 -->
+            <map name="worldmap">
+                <!-- 日本のクリック領域（多角形で指定） -->
+                <area shape="poly" coords="648,193,670,209,672,221,664,236,656,252,642,267,633,277,624,271,627,253,635,233,634,213" alt="日本" title="日本" onclick="playSound('nihon-audio')">
+                
+                <!-- ブラジルのクリック領域（多角形で指定） -->
+                <area shape="poly" coords="871,311,941,342,960,388,940,457,928,489,885,491,848,460,844,400,849,343" alt="ブラジル" title="ブラジル" onclick="playSound('brazil-audio')">
+            </map>
+        </div>
+
+        <!-- 再生する音声ファイルをあらかじめ読み込んでおく -->
+        <audio id="nihon-audio" src="nihon.mp3" preload="auto"></audio>
+        <audio id="brazil-audio" src="brazil.mp3" preload="auto"></audio>
+
+    </div>
+
+    <script>
+        // 音声を再生するための関数
+        function playSound(audioId) {
+            const audio = document.getElementById(audioId);
+            if (audio) {
+                // もし他の音声が再生中であれば、一旦すべて停止する
+                document.querySelectorAll('audio').forEach(a => {
+                    a.pause();
+                    a.currentTime = 0; // 再生位置を先頭に戻す
+                });
+                
+                // クリックされた音声を再生する
+                audio.play().catch(error => {
+                    console.error("音声の再生に失敗しました:", error);
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>
