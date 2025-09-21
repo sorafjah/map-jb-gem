@@ -26,15 +26,16 @@
 
         <!-- 地図画像と、それに関連付けるイメージマップ -->
         <div class="relative border rounded-lg overflow-hidden">
-            <img src="map-jb.jpg" alt="世界地図" usemap="#worldmap" class="w-full h-auto">
+            <!-- 画像ファイル名を .png に修正し、id を追加 -->
+            <img id="worldmap-image" src="map-jb.png" alt="世界地図" usemap="#worldmap" class="w-full h-auto">
             
             <!-- イメージマップの定義 -->
             <map name="worldmap">
                 <!-- 日本のクリック領域（多角形で指定） -->
-                <area shape="poly" coords="648,193,670,209,672,221,664,236,656,252,642,267,633,277,624,271,627,253,635,233,634,213" alt="日本" title="日本" onclick="playSound('nihon-audio')">
+                <area class="resizable-area" shape="poly" coords="648,193,670,209,672,221,664,236,656,252,642,267,633,277,624,271,627,253,635,233,634,213" alt="日本" title="日本" onclick="playSound('nihon-audio')">
                 
                 <!-- ブラジルのクリック領域（多角形で指定） -->
-                <area shape="poly" coords="871,311,941,342,960,388,940,457,928,489,885,491,848,460,844,400,849,343" alt="ブラジル" title="ブラジル" onclick="playSound('brazil-audio')">
+                <area class="resizable-area" shape="poly" coords="871,311,941,342,960,388,940,457,928,489,885,491,848,460,844,400,849,343" alt="ブラジル" title="ブラジル" onclick="playSound('brazil-audio')">
             </map>
         </div>
 
@@ -57,11 +58,58 @@
                 
                 // クリックされた音声を再生する
                 audio.play().catch(error => {
+                    // ユーザー操作なしで再生しようとするとエラーになることがあるため、コンソールに出力
                     console.error("音声の再生に失敗しました:", error);
                 });
             }
         }
+
+        /**
+         * レスポンシブ対応のためのイメージマップ座標調整
+         * 画像の表示サイズに合わせて、クリック領域の座標を再計算します。
+         */
+        function resizeImageMap() {
+            const image = document.getElementById('worldmap-image');
+            // 画像の本来のサイズ (この値は実際の元画像サイズに合わせてください)
+            const originalWidth = 1024; 
+
+            // 現在表示されている画像の横幅
+            const currentWidth = image.offsetWidth;
+
+            // 画像がまだ表示されていない、または非表示の場合は処理を中断
+            if (currentWidth === 0) return;
+
+            // サイズの比率を計算
+            const ratio = currentWidth / originalWidth;
+
+            const areas = document.querySelectorAll('.resizable-area');
+
+            areas.forEach(area => {
+                // オリジナルの座標を初回のみdata属性に保存しておく
+                if (!area.dataset.originalCoords) {
+                    area.dataset.originalCoords = area.getAttribute('coords');
+                }
+
+                const originalCoords = area.dataset.originalCoords.split(',').map(Number);
+                const newCoords = originalCoords.map(coord => Math.round(coord * ratio));
+
+                area.setAttribute('coords', newCoords.join(','));
+            });
+        }
+
+        // ページの読み込み時とウィンドウサイズ変更時に座標を再計算
+        window.addEventListener('load', () => {
+             // 画像の読み込み完了を待ってから初回リサイズを実行
+            const image = document.getElementById('worldmap-image');
+            if (image.complete) {
+                resizeImageMap();
+            } else {
+                image.addEventListener('load', resizeImageMap);
+            }
+        });
+        window.addEventListener('resize', resizeImageMap);
     </script>
 
 </body>
 </html>
+
